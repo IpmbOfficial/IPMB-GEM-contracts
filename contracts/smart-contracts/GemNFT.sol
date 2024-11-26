@@ -3,8 +3,8 @@
 /**
  *
  *  @title: GEM NFTs
- *  @date: 31-October-2024
- *  @version: 2.2
+ *  @date: 26-November-2024
+ *  @version: 2.3
  *  @author: IPMB Dev Team
  */
 
@@ -1944,8 +1944,6 @@ interface IERC20 {
 
 pragma solidity ^0.8.25;
 
-import "./MerkleProof.sol";
-import "./IPriceFeed.sol";
 import "./IStaking.sol";
 
 contract GEMNFTs is ERC721, Ownable {
@@ -1971,22 +1969,18 @@ contract GEMNFTs is ERC721, Ownable {
     bool public burnIsActive = false;
     uint256 circSupply;
     uint256 public burnFee;
-    address public ipmbAddress;
     address public mintingAddress;
     IStaking public stakingAddress;
-    IPriceFeed public priceFeedAddress;
 
     // declaration of mappings
 
     mapping(string => gemCat) gemCategories;
-    mapping(uint256 => bytes32) public merkleRoots;
     mapping(uint256 => string) public tURI;
     mapping(uint256 => string) public tCategory;
     mapping(address => bool) public adminPermissions;
     mapping(uint256 => address) public burnAddressForToken;
     mapping(bytes32 => bool) public mintedSt;
     mapping (address => mapping (uint256 => bool) ) public alreadyClaimDiscount;
-    event setPrices(uint256 indexed ipmb, uint256 indexed gold);
     address public burnAddr;
 
     // declaration of modifiers
@@ -1998,11 +1992,9 @@ contract GEMNFTs is ERC721, Ownable {
 
    // constructor
 
-    constructor(string memory name, string memory symbol, address _staking, address _ipmb, address _priceFeedAddress) ERC721(name, symbol) {
+    constructor(string memory name, string memory symbol, address _stakingAddress) ERC721(name, symbol) {
         adminPermissions[msg.sender] = true;
-        stakingAddress = IStaking(_staking);
-        ipmbAddress = _ipmb;
-        priceFeedAddress = IPriceFeed(_priceFeedAddress);
+        stakingAddress = IStaking(_stakingAddress);
         burnAddr = 0x000000000000000000000000000000000000dEaD;
     }
 
@@ -2049,7 +2041,7 @@ contract GEMNFTs is ERC721, Ownable {
     }
 
     /**
-    * Allows IPMB holders to mint an NFT from a minting smart contract
+    * Allows GPRO holders to mint an NFT from a minting smart contract
     */
 
     function mintGEMNFTAUTH(string memory _id, address _receiver) public {
@@ -2063,7 +2055,7 @@ contract GEMNFTs is ERC721, Ownable {
     }
 
     /**
-    * Set IPMB Staking contract address
+    * Set Staking contract address
     */
 
     function setStakingAddress(address _staking) public onlyOwner {
@@ -2076,22 +2068,6 @@ contract GEMNFTs is ERC721, Ownable {
 
     function setMintingAddress(address _minting) public onlyOwner {
         mintingAddress = _minting;
-    }
-
-    /**
-    * Set Update Prices Contract
-    */
-
-    function updatePricesContract(address _address) public onlyOwner {
-        priceFeedAddress = IPriceFeed(_address);
-    }
-
-    /**
-    * Set MerkleRoot per epoch
-    */
-
-    function setEpochMerkleRoot(uint256 _epoch, bytes32 _merkleRoot) public adminRequired {
-        merkleRoots[_epoch] = _merkleRoot;
     }
 
     /**
