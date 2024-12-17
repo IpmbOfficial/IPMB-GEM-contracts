@@ -3,8 +3,8 @@
 /**
  *
  *  @title: GEM NFTs
- *  @date: 26-November-2024
- *  @version: 2.3
+ *  @date: 17-December-2024
+ *  @version: 2.4
  *  @author: IPMB Dev Team
  */
 
@@ -1968,6 +1968,7 @@ contract GEMNFTs is ERC721, Ownable {
     bool public contractIsActive = false;
     bool public burnIsActive = false;
     uint256 circSupply;
+    uint256 burnPeriod;
     uint256 public burnFee;
     address public mintingAddress;
     IStaking public stakingAddress;
@@ -1979,7 +1980,7 @@ contract GEMNFTs is ERC721, Ownable {
     mapping(uint256 => string) public tCategory;
     mapping(address => bool) public adminPermissions;
     mapping(uint256 => address) public burnAddressForToken;
-    mapping(bytes32 => bool) public mintedSt;
+    mapping(uint256 => uint256) public mintedDate;
     mapping (address => mapping (uint256 => bool) ) public alreadyClaimDiscount;
     address public burnAddr;
 
@@ -1992,10 +1993,11 @@ contract GEMNFTs is ERC721, Ownable {
 
    // constructor
 
-    constructor(string memory name, string memory symbol, address _stakingAddress) ERC721(name, symbol) {
+    constructor(string memory name, string memory symbol, address _stakingAddress, uint256 _burnPeriod) ERC721(name, symbol) {
         adminPermissions[msg.sender] = true;
         stakingAddress = IStaking(_stakingAddress);
         burnAddr = 0x000000000000000000000000000000000000dEaD;
+        burnPeriod = _burnPeriod;
     }
 
     /*     
@@ -2025,6 +2027,14 @@ contract GEMNFTs is ERC721, Ownable {
     }
 
     /*
+    * Update burning period
+    */
+
+    function updateBurnPeriod(uint256 _burnPeriod) public adminRequired {
+        burnPeriod = _burnPeriod;
+    }
+
+    /*
     * Pause contract if active, make active if paused
     */
 
@@ -2049,6 +2059,7 @@ contract GEMNFTs is ERC721, Ownable {
         uint256 mintIndex = circSupply;
         tURI[mintIndex] = gemCategories[_id].URI;
         tCategory[mintIndex] = _id;
+        mintedDate[mintIndex] = block.timestamp;
         gemCategories[_id].counter = gemCategories[_id].counter + 1;
         circSupply = circSupply + 1;
         _safeMint(_receiver, mintIndex);
@@ -2080,6 +2091,7 @@ contract GEMNFTs is ERC721, Ownable {
         require (msg.sender == ownerOf(tokenId), "Address is not the owner");
         require(stakingAddress.retrieveKYCStatus(msg.sender) == true, "Address has not passed KYC");
         require(stakingAddress.retrieveBlackListStatus(msg.sender) == false, "Address is blacklisted");
+        require(block.timestamp >= mintedDate[tokenId] + burnPeriod, "Burn Period has not passed");
         _burn(tokenId);
         tURI[tokenId] = "burnt";
         burnAddressForToken[tokenId] = msg.sender;
@@ -2161,6 +2173,22 @@ contract GEMNFTs is ERC721, Ownable {
 
     function retrieveCategoryPrice(string memory _id) public view returns (uint256) {
         return (gemCategories[_id].price);
+    }
+
+    /**
+    * Function to return the burning period
+    */
+
+    function retrieveBurnPeriod() public view returns (uint256) {
+        return (burnPeriod);
+    }
+
+    /**
+    * Function to return the burning status
+    */
+
+    function retrieveBurnStatus(uint256 _tokenId) public view returns (bool) {
+        return (block.timestamp >= mintedDate[_tokenId] + burnPeriod);
     }
 
 }
