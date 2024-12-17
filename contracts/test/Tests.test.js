@@ -662,6 +662,7 @@ describe("Staking tests", function () {
       )
     })
 
+    // check balance of wallet
     it("#balanceOftokens", async function () {
       const amount = await contracts.hhgemnfts.balanceOf(
         signers.owner.address
@@ -669,11 +670,29 @@ describe("Staking tests", function () {
       expect(amount).equal(1); //
     })
 
+    // check circulating 
     it("#checkSupplyOfGEM1", async function () {
       const [, , counter] = await contracts.hhgemnfts.retrieveCategoryData(
         "1"
       )
       expect(counter).equal(1); //
+    })
+
+    // mint batch on-spot
+    it("#mintGEMSPOTBatch", async function () {
+      await contracts.hhgemminting.mintSpotBatch(
+        ["1","1"], // _id
+        signers.owner.address, // _receiver
+        [] // merkleProof
+      )
+    })
+
+    // check new circulating supply
+    it("#checkSupplyOfGEM1", async function () {
+      const [, , counter] = await contracts.hhgemnfts.retrieveCategoryData(
+        "1"
+      )
+      expect(counter).equal(3); //
     })
 
   }) // minting process

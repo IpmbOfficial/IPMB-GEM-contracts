@@ -3,8 +3,8 @@
 /**
  *
  *  @title: GEMNFT Minting
- *  @date: 26-November-2024
- *  @version: 1.7
+ *  @date: 17-December-2024
+ *  @version: 1.8
  *  @author: IPMB Dev Team
  */
 
@@ -52,7 +52,7 @@ contract GEMMinting is Ownable {
     }
 
     /*     
-    * Mint GEM NFT
+    * Mint GEM NFT either on-spot or using a staking position
     */
 
     function mintGEMNFT(string memory _id, address _receiver, uint256 _poolID, uint256 _epoch, uint256 _index, bytes32[] calldata merkleProof) public payable {
@@ -65,6 +65,16 @@ contract GEMMinting is Ownable {
         require(counter < supply, "Supply Reached");
         validateDiscount(price, _poolID, msg.sender, _index, _epoch, merkleProof);
         gemNFTAddress.mintGEMNFTAUTH(id, _receiver);
+    }
+
+    /*     
+    * Mint GEM NFT on-spot batch
+    */
+
+    function mintSpotBatch(string[] memory _id, address _receiver, bytes32[] calldata merkleProof) public {
+        for (uint256 i=0; i < _id.length; i++ ) {
+            mintGEMNFT(_id[i], _receiver , 0 ,0 ,0, merkleProof);
+        }
     }
 
     /*     
