@@ -2143,11 +2143,21 @@ contract GEMNFTs is ERC721, Ownable {
     }
 
     /**
-    * Function to update token uri
+    * Function to update token URI
     */
 
     function changeTokenURI(uint256 _tokenId, string memory _tURI) public adminRequired {
         tURI[_tokenId] = _tURI;
+    }
+
+    /**
+    * Function to update the URIs of multiple tokens
+    */
+
+    function changeTokenURIBatch(uint256[] memory _tokenId, string[] memory _tURI) public adminRequired {
+        for (uint256 i=0; i < _tokenId.length; i ++) {
+            tURI[_tokenId[i]] = _tURI[i];
+        }
     }
 
     /**
