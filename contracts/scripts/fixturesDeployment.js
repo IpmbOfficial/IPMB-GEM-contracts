@@ -38,10 +38,32 @@ const fixturesDeployment = async () => {
     600
   )
 
+  const gemnfts = await ethers.getContractFactory(
+    "GEMNFTs"
+  )
+  const hhgemnfts = await gemnfts.deploy(
+    "GEMNFTS",
+    "GEM",
+    await hhGPROStaking.getAddress(),
+    600
+  )
+
+  const gemminting = await ethers.getContractFactory(
+    "GEMMinting"
+  )
+  const hhgemminting = await gemminting.deploy(
+    await hhGPROStaking.getAddress(),
+    await hhGoldPro.getAddress(),
+    await hhPriceFeed.getAddress(),
+    await hhgemnfts.getAddress()
+  )
+
   const contracts = {
     hhPriceFeed: hhPriceFeed,
     hhGoldPro: hhGoldPro,
-    hhGPROStaking: hhGPROStaking
+    hhGPROStaking: hhGPROStaking,
+    hhgemnfts: hhgemnfts,
+    hhgemminting: hhgemminting
   }
 
   const signers = {

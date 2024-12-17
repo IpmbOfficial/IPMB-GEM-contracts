@@ -23,6 +23,12 @@ describe("Staking tests", function () {
       expect(await contracts.hhGPROStaking.getAddress()).to.not.equal(
         ethers.ZeroAddress,
       )
+      expect(await contracts.hhgemnfts.getAddress()).to.not.equal(
+        ethers.ZeroAddress,
+      )
+      expect(await contracts.hhgemminting.getAddress()).to.not.equal(
+        ethers.ZeroAddress,
+      )
     })
   })
 
@@ -610,5 +616,66 @@ describe("Staking tests", function () {
 
 
   }) // end multi deposit test
+
+  context("Mint NFT", () => {
+
+    // turn minting on
+    it("#flipContractState", async function () {
+      await contracts.hhgemnfts.flipContractState()
+    })
+
+    // set minting address
+    it("#setMintingAddress", async function () {
+      await contracts.hhgemnfts.setMintingAddress(
+        contracts.hhgemminting.getAddress()
+      )
+    })
+
+    // create gem category
+    it("#createGEM1", async function () {
+      await contracts.hhgemnfts.setGemCategory(
+        "1", // _id
+        "metadata", // _URI
+        BigInt(1000000000000000000), // _price
+        1000, // _supply
+        0 // _fee
+      )
+    })
+
+    // approve tokens
+    it("#approveTokens", async function () {
+      await contracts.hhGoldPro.approve(
+        contracts.hhgemminting,
+        BigInt(100000000000000000000) // 100 GPRO
+      )
+    })
+
+    // mint token
+    it("#mintGEMSPOT", async function () {
+      await contracts.hhgemminting.mintGEMNFT(
+        "1", // _id
+        signers.owner.address, // _receiver
+        0, // _poolID
+        0, // _epoch
+        0, // _index
+        [] // merkleProof
+      )
+    })
+
+    it("#balanceOftokens", async function () {
+      const amount = await contracts.hhgemnfts.balanceOf(
+        signers.owner.address
+      )
+      expect(amount).equal(1); //
+    })
+
+    it("#checkSupplyOfGEM1", async function () {
+      const [, , counter] = await contracts.hhgemnfts.retrieveCategoryData(
+        "1"
+      )
+      expect(counter).equal(1); //
+    })
+
+  }) // minting process
 
 })
