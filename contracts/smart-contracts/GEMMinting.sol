@@ -3,8 +3,8 @@
 /**
  *
  *  @title: GEMNFT Minting
- *  @date: 17-December-2024
- *  @version: 1.8
+ *  @date: 07-January-2025
+ *  @version: 1.9
  *  @author: IPMB Dev Team
  */
 
@@ -57,7 +57,7 @@ contract GEMMinting is Ownable {
 
     function mintGEMNFT(string memory _id, address _receiver, uint256 _poolID, uint256 _epoch, uint256 _index, bytes32[] calldata merkleProof) public payable {
         string memory id = _id;
-        (, uint256 price, uint256 counter, uint256 supply, uint256 fee, bool status) = gemNFTAddress.retrieveCategoryData(id);
+        (uint256 price, uint256 counter, uint256 supply, uint256 fee, bool status) = gemNFTAddress.retrieveCategoryData(id);
         require(msg.value == fee, "Fee error");
         require(stakingAddress.retrieveBlackListStatus(msg.sender) == false, "Address is blacklisted");
         require(gemNFTAddress.contractIsActive(), "Contract must be active to mint");
@@ -197,7 +197,7 @@ contract GEMMinting is Ownable {
     */
 
     function priceSimulation(uint256 _opt, string memory _id, uint256 _poolID, uint256 _epoch) public view returns (uint256, uint256) {
-        (, uint256 price, , , , ) = gemNFTAddress.retrieveCategoryData(_id);
+        (uint256 price, , , , ) = gemNFTAddress.retrieveCategoryData(_id);
         if (_opt == 1) {
             uint256 polID = _poolID;
             (uint256 goldProPrice, uint256 goldPrice , , ,) = priceFeedAddress.getEpochPrices(_epoch);

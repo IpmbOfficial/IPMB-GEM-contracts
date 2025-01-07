@@ -7,7 +7,7 @@ const fixturesDeployment = require("../scripts/fixturesDeployment.js")
 let signers
 let contracts
 
-describe("Staking tests", function () {
+describe("Staking & Minting tests", function () {
   before(async function () {
     ;({ signers, contracts } = await loadFixture(fixturesDeployment))
   })
@@ -635,7 +635,6 @@ describe("Staking tests", function () {
     it("#createGEM1", async function () {
       await contracts.hhgemnfts.setGemCategory(
         "1", // _id
-        "metadata", // _URI
         BigInt(1000000000000000000), // _price
         1000, // _supply
         0 // _fee
@@ -672,7 +671,7 @@ describe("Staking tests", function () {
 
     // check circulating 
     it("#checkSupplyOfGEM1", async function () {
-      const [, , counter] = await contracts.hhgemnfts.retrieveCategoryData(
+      const [, counter] = await contracts.hhgemnfts.retrieveCategoryData(
         "1"
       )
       expect(counter).equal(1); //
@@ -689,7 +688,7 @@ describe("Staking tests", function () {
 
     // check new circulating supply
     it("#checkSupplyOfGEM1", async function () {
-      const [, , counter] = await contracts.hhgemnfts.retrieveCategoryData(
+      const [, counter] = await contracts.hhgemnfts.retrieveCategoryData(
         "1"
       )
       expect(counter).equal(3); //

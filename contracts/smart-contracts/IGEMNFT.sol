@@ -9,7 +9,7 @@ pragma solidity ^0.8.5;
 
 interface IGEMNFT {
 
-    function retrieveCategoryData(string memory _id) external view returns (string memory, uint256, uint256, uint256, uint256, bool);
+    function retrieveCategoryData(string memory _id) external view returns (uint256, uint256, uint256, uint256, bool);
 
     function contractIsActive() external view returns (bool);
 
