@@ -2410,7 +2410,6 @@ contract GEMNFTs is ERC721, Ownable {
     mapping(address => bool) public adminPermissions;
     mapping(uint256 => address) public burnAddressForToken;
     mapping(uint256 => uint256) public mintedDate;
-    mapping (address => mapping (uint256 => bool) ) public alreadyClaimDiscount;
     address public burnAddr;
 
     // declaration of modifiers
