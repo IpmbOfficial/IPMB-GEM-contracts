@@ -3,8 +3,8 @@
 /**
  *
  *  @title: GEM NFTs
- *  @date: 07-January-2025
- *  @version: 2.5
+ *  @date: 30-January-2025
+ *  @version: 2.6
  *  @author: IPMB Dev Team
  */
 
@@ -2596,6 +2596,7 @@ contract GEMNFTs is ERC721, Ownable {
     */
 
     function retrieveBurnStatus(uint256 _tokenId) public view returns (bool) {
+        require(_exists(_tokenId), "ERC721Metadata: URI query for nonexistent token");
         return (block.timestamp >= mintedDate[_tokenId] + burnPeriod);
     }
 
