@@ -3,8 +3,8 @@
 /**
  *
  *  @title: Staking Pools
- *  @date: 26-November-2024
- *  @version: 2.6
+ *  @date: 21-January-2025
+ *  @version: 2.7
  *  @author: IPMB Dev Team
  */
 
@@ -39,12 +39,20 @@ contract GPROStaking is Ownable {
         uint256 goldPrice;
     }
 
+    // request for withdrawal structure
+
+    struct requestStr {
+        uint256 withdrawalRqDate;
+        bool withdrawalRqStatus;
+    }
+
     // mappings declaration
 
     mapping (address => bool) public admin;
     mapping (address => bool) public authority;
     mapping (address => bool) public blacklist;
     mapping (uint256 => poolStr) public poolsRegistry;
+    mapping (address => mapping (uint256 => mapping (uint256 => requestStr))) public withdrawalRequests;
     mapping (address => bool) public kycAddress;
     mapping (address => mapping (uint256 => uint256)) public addressCounter;
     mapping (address => mapping (uint256 => uint256[])) public addressArray;
@@ -79,6 +87,7 @@ contract GPROStaking is Ownable {
     event poolUpdate(uint256 indexed poolId);
     event poolDeposit(uint256 indexed poolId, address indexed addr, uint256 indexed index, uint256 amount);
     event poolWithdrawal(uint256 indexed poolId, address indexed addr, uint256 indexed index, uint256 amount);
+    event poolWithdrawalRequest(uint256 indexed poolId, address indexed addr, uint256 indexed index, uint256 ts);
     event blacklistWithdrawal(uint256 indexed poolId, address indexed addr, uint256 indexed index, uint256 amount);
     event poolResetAfterMinting(uint256 indexed poolId, address indexed addr, uint256 indexed index);
     event adminStatus(address indexed addr, bool indexed status);
@@ -139,7 +148,7 @@ contract GPROStaking is Ownable {
         emit poolDeposit(_poolID, msg.sender, count, poolsRegistry[_poolID].amount);
     }
 
-    // function to deposit multitimes
+    // function to deposit multiple times
 
     function multiDepositPool(uint256[] memory _poolIDs, uint256[] memory _quantity) public {
         require(_poolIDs.length == _quantity.length , "Check lengths");
@@ -150,12 +159,23 @@ contract GPROStaking is Ownable {
         }
     }
 
-    // function to withdrawl deposit amounts
+    // function to make a withdrawal request
+
+    function requestWithdrawalPool(uint256 _poolID, uint256 _index) public {
+        require(blacklist[msg.sender] == false, "Address is blacklisted");
+        require(addressDataNew[msg.sender][_poolID][_index].amount == poolsRegistry[_poolID].amount, "No deposit");
+        withdrawalRequests[msg.sender][_poolID][_index].withdrawalRqDate = block.timestamp;
+        withdrawalRequests[msg.sender][_poolID][_index].withdrawalRqStatus = true;
+        emit poolWithdrawalRequest(_poolID, msg.sender, _index, block.timestamp);
+    }
+
+    // function to withdrawl deposit amounts after a request
 
     function withdrawalPool(uint256 _poolID, uint256 _index) public {
         require(blacklist[msg.sender] == false, "Address is blacklisted");
         require(addressDataNew[msg.sender][_poolID][_index].amount == poolsRegistry[_poolID].amount, "No deposit");
-        require(block.timestamp >= addressDataNew[msg.sender][_poolID][_index].dateDeposit + poolsRegistry[_poolID].lockDuration, "Time has not passed");
+        require(withdrawalRequests[msg.sender][_poolID][_index].withdrawalRqStatus == true, "You have not requested a withdrawal");
+        require(block.timestamp >= withdrawalRequests[msg.sender][_poolID][_index].withdrawalRqDate + poolsRegistry[_poolID].lockDuration, "Time has not passed");
         uint256 amount = addressDataNew[msg.sender][_poolID][_index].amount;
         addressDataNew[msg.sender][_poolID][_index].amount = 0;
         addressDataNew[msg.sender][_poolID][_index].dateDeposit = 0;
@@ -174,8 +194,10 @@ contract GPROStaking is Ownable {
 
     // function to update pool data
 
-    function updatePoolData(uint256 _poolID, uint256 _poolMax, bool status) public onlyAdmin {
+    function updatePoolData(uint256 _poolID, string memory _poolName, uint256 _poolMax, uint256 _lockDuration, bool status) public onlyAdmin {
+        poolsRegistry[_poolID].poolName = _poolName;
         poolsRegistry[_poolID].poolMax = _poolMax;
+        poolsRegistry[_poolID].lockDuration = _lockDuration;
         poolsRegistry[_poolID].status = status;
         emit poolUpdate(_poolID);
     }
@@ -280,7 +302,7 @@ contract GPROStaking is Ownable {
     // retrieve discount
 
     function getDiscount(uint256 _poolID, address _address, uint256 _index) public view returns (uint256) {
-        if ((addressDataNew[_address][_poolID][_index].amount == poolsRegistry[_poolID].amount) && (block.timestamp >= addressDataNew[_address][_poolID][_index].dateDeposit + poolsRegistry[_poolID].duration)) {
+        if ((addressDataNew[_address][_poolID][_index].amount == poolsRegistry[_poolID].amount) && (block.timestamp >= addressDataNew[_address][_poolID][_index].dateDeposit + poolsRegistry[_poolID].duration) && (withdrawalRequests[_address][_poolID][_index].withdrawalRqStatus == false)) {
             return poolsRegistry[_poolID].discount;
         } else {
             return 0;
@@ -369,6 +391,12 @@ contract GPROStaking is Ownable {
 
     function retrieveBlackListStatus(address _address) public view returns (bool) {
         return (blacklist[_address]);
+    }
+
+    // retrieve withdrawal request details
+
+    function withdrawalRqPerAddress(uint256 _poolID, address _address, uint256 _index) public view returns (uint256, bool) {
+        return (withdrawalRequests[_address][_poolID][_index].withdrawalRqDate, withdrawalRequests[_address][_poolID][_index].withdrawalRqStatus);
     }
 
 }
