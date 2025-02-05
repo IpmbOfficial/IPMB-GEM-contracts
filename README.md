@@ -93,7 +93,7 @@ For the GPRO, PriceFeed and Staking contracts addresses view the [Staking repo](
 ## Tests
 
 1. Download the github repo
-2. Open command prompt and navigate to the [contracts & tests](https://github.com/IpmbOfficial/IPMB-GEM-contracts/tree/main/contracts)
+2. Open command prompt and navigate to the [contracts](https://github.com/IpmbOfficial/IPMB-GEM-contracts/tree/main/contracts) folder
 3. Install hardhat using `npm i`
 4. Compile smart contracts using `npx hardhat compile`
   - If you get `Error HH502` then please upgrade to the laetst hardhat - `npm up hardhat`
