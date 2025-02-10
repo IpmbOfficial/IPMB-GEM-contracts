@@ -617,7 +617,7 @@ describe("Staking & Minting tests", function () {
 
   }) // end multi deposit test
 
-  context("Mint NFT", () => {
+  context("Mint NFT Instant Buy", () => {
 
     // turn minting on
     it("#flipContractState", async function () {
@@ -695,5 +695,99 @@ describe("Staking & Minting tests", function () {
     })
 
   }) // minting process
+
+  context("Mint NFT with staking position", () => {
+
+    // set minting address
+    it("#setMintingAddress", async function () {
+      await contracts.hhGPROStaking.setGEMMintingContract(
+        contracts.hhgemminting.getAddress()
+      )
+    })
+
+    // approve minting contract
+    it("#approveMinting", async function () {
+      await contracts.hhGPROStaking.approveGEMMintingContract(BigInt(100000000000000000000)) // 100 GPRO
+         
+    })
+
+    // owner address
+    it("Should log the owner's address", async function() {
+      // Get the signers
+      const [owner] = await ethers.getSigners();
+      
+      // Log the owner's address to console
+      console.log("Owner's address:", owner.address);
+      
+      // Optionally, you might want to assert something, like:
+      expect(owner.address).to.be.properAddress; // Just to ensure it's a valid address
+    });
+
+    // deposit
+    it("#depositPool", async function () {
+      await contracts.hhGPROStaking.depositPool(
+        1
+      )
+    })
+
+    // check deposit
+    it("#poolAmount", async function () {
+      const amount = await contracts.hhGPROStaking.poolAmountPerAddress(
+        1, // _poolId
+        signers.owner.address, // _address
+        3 // _index
+      )
+      expect(amount).equal(BigInt(1000000000000000000)); //
+    })
+
+    // check discount
+    it("#discount", async function () {
+      await time.increase(605);
+      expect(await contracts.hhGPROStaking.getDiscount(
+        1, // _poolId
+        signers.owner.address, // _address
+        3, // _index
+      )).to.equal(2);
+    })
+
+    // set Epoch Merkle Root
+    it("#setEpoch", async function () {
+      await contracts.hhgemminting.setEpochMerkleRoot(
+        0,
+        "0xb9eef4baaca80a8db40f72f0ce9e66b659a65dc11efe8180c0bec577bea6d0a0" // Merkle Root
+      )
+    })
+
+    // mint token
+    it("#mintGEMSPOT", async function () {
+      await contracts.hhgemminting.mintGEMNFT(
+        "1", // _id
+        signers.owner.address, // _receiver
+        1, // _poolID
+        0, // _epoch
+        3, // _index
+        ["0x92b4dc55abf502327566e9a49dae3fa4e8a402e67498d02c82053c9f27d9192e"] // merkleProof
+      )
+    })
+
+    // check balance of wallet
+    it("#balanceOftokens", async function () {
+      const amount = await contracts.hhgemnfts.balanceOf(
+        signers.owner.address
+      )
+      expect(amount).equal(4); //
+    })
+
+    // check circulating 
+    it("#checkSupplyOfGEM1", async function () {
+      const [, counter] = await contracts.hhgemnfts.retrieveCategoryData(
+        "1"
+      )
+      expect(counter).equal(4); //
+    })
+
+  }) // minting process
+
+
 
 })
