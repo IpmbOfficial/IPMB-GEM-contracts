@@ -80,11 +80,19 @@ This repository contains the Solidity smart contracts **GEMMinting** and **GEMNF
 
 ---
 
-## Polygon PoS - Amoy Testnet
+## Smart contracts
+
+### Polygon PoS - Amoy Testnet
 
 *GEMNFTs - v2.5:* [0xACac111bBf412f9B41A6F171dF93a824AA4D7706](https://amoy.polygonscan.com/address/0xACac111bBf412f9B41A6F171dF93a824AA4D7706)
 
 *GEMMinting - v1.9:* [0xEb3354f4F22eD16c844Ba4241Bb4e5C781A3e1CA](https://amoy.polygonscan.com/address/0xEb3354f4F22eD16c844Ba4241Bb4e5C781A3e1CA)
+
+### Polygon PoS - Mainnet
+
+*GEMNFTs - v2.6:* [0x6878c8851e78ab10777753f5c79a5478bd1b2a3b](https://polygonscan.com/address/0x6878c8851e78ab10777753f5c79a5478bd1b2a3b)
+
+*GEMMinting - v1.9:* [0x11ab90fb7e200dc16EA1224D27e02E214D0e7f06](https://polygonscan.com/address/0x11ab90fb7e200dc16EA1224D27e02E214D0e7f06)
 
 For the GPRO, PriceFeed and Staking contracts addresses view the [Staking repo](https://github.com/IpmbOfficial/IPMB-staking-contracts)
 
